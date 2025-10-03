@@ -23,7 +23,7 @@ bot.command('help', (ctx) => {
         '• www.svoboda.org\n' +
         '• www.sibreal.org\n' +
         '• www.severreal.org\n' +
-        
+        '• www.kavkazr.com\n'
     );
 });
 

@@ -53,7 +53,7 @@ async function generateShortURL(url: string): Promise<string | null> {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${config.authToken}`
+                'Authorization': config.authToken
             }
         });
 
