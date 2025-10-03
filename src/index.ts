@@ -19,11 +19,11 @@ bot.command('start', (ctx) => {
 bot.command('help', (ctx) => {
     ctx.reply(
         'Just send me a URL from any RFE/RL website and I\'ll create a mirror link that works in restricted regions.\n\n' +
-        'Supported sites include:\n' +
-        '• rferl.org\n' +
-        '• radiosvoboda.org\n' +
-        '• azadiradio.com\n' +
-        '• and many others'
+        'Supported sites:\n' +
+        '• www.svoboda.org\n' +
+        '• www.sibreal.org\n' +
+        '• www.severreal.org\n' +
+        
     );
 });
 
