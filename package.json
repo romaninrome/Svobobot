@@ -11,6 +11,7 @@
   "author": "roman_in_rome",
   "license": "GNU",
   "dependencies": {
+    "@google/genai": "^1.22.0",
     "grammy": "^1.38.2"
   }
 }
