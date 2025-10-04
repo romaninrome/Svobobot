@@ -8,50 +8,86 @@ const bot = new Bot(config.telegramToken);
 // Rate limiting
 const userRequestTimes = new Map<number, number[]>();
 const rateLimitWindow = 60000; // 1 minute
-const maxRequests = 5; // 5 requests per minute
+const maxRequests = 5;
+const cleanupInterval = 5 * 60 * 1000; // 5 minutes
 
-function isRateLimited(userId: number): boolean {
+function checkRateLimit(userId: number): boolean {
     const now = Date.now();
     const userTimes = userRequestTimes.get(userId) || [];
-
-    // Remove timestamps older than the window
     const recentTimes = userTimes.filter(time => now - time < rateLimitWindow);
 
-    if (recentTimes.length >= maxRequests) {
-        return true;
+    if (recentTimes.length >= maxRequests
+
+    ) {
+        return false; // Rate limited
     }
 
     recentTimes.push(now);
     userRequestTimes.set(userId, recentTimes);
-    return false;
-}
+    return true; // OK to proceed
+};
 
-function shouldProcessURL(ctx: any, url: string): { process: boolean; reason?: string } {
-    // Check if URL is from supported domain
+// Cleanup old entries periodically
+setInterval(() => {
+    const now = Date.now();
+    for (const [userId, times] of userRequestTimes.entries()) {
+        const recentTimes = times.filter(time => now - time < rateLimitWindow);
+        recentTimes.length === 0 ? userRequestTimes.delete(userId) : userRequestTimes.set(userId, recentTimes);
+    }
+}, cleanupInterval);
+
+function validateRequest(ctx: any, url: string): string | null {
+    // Validate URL format
     try {
         const urlObject = new URL(url);
         if (!domains[urlObject.hostname]) {
-            return { process: false, reason: 'unsupported_domain' };
+            return '❌ This domain is not supported. Only RFE/RL websites are supported.';
         }
     } catch {
-        return { process: false, reason: 'invalid_url' };
+        return '❌ Invalid URL provided.';
     }
 
     // Check rate limit
-    if (isRateLimited(ctx.from.id)) {
-        return { process: false, reason: 'rate_limited' };
+    if (!checkRateLimit(ctx.from.id)) {
+        return '⏳ Please wait a moment before sending another request.';
     }
 
-    // Check whitelist if configured
-    const allowedChats = (config as any).allowedChats;
-    if (allowedChats && Array.isArray(allowedChats) && allowedChats.length > 0 && !allowedChats.includes(ctx.chat.id)) {
-        return { process: false, reason: 'chat_not_allowed' };
+    // Check whitelist
+    const allowedChats = config.allowedChats;
+    if (allowedChats.length > 0 && !allowedChats.includes(ctx.chat.id)) {
+        return '❌ This bot is not available in this chat.';
     }
 
-    return { process: true };
-}
+    return null; // All checks passed
+};
 
-// Command: /start
+async function processURL(ctx: any, url: string): Promise<void> {
+    const errorMessage = validateRequest(ctx, url);
+    if (errorMessage) {
+        await ctx.reply(errorMessage);
+        return;
+    }
+
+    const statusMsg = await ctx.reply('🔄 Generating mirror URL...');
+
+    try {
+        const mirrorURL = await generateMirrorURL(url);
+        const message = mirrorURL
+            ? `✅ Mirror URL:\n\n${mirrorURL}`
+            : '❌ Unable to generate mirror URL. Make sure you\'re using a supported RFE/RL domain.';
+
+        await ctx.api.editMessageText(ctx.chat.id, statusMsg.message_id, message);
+    } catch (error) {
+        console.error('Error:', error);
+        await ctx.api.editMessageText(
+            ctx.chat.id,
+            statusMsg.message_id,
+            '❌ An error occurred while generating the mirror URL.'
+        );
+    }
+};
+
+// Commands
 bot.command('start', (ctx) => {
     ctx.reply(
         'Welcome! 👋\n\n' +
@@ -62,7 +98,6 @@ bot.command('start', (ctx) => {
     );
 });
 
-// Command: /help
 bot.command('help', (ctx) => {
     ctx.reply(
         'Just send me a URL from any RFE/RL website and I\'ll create a mirror link that works in restricted regions.\n\n' +
@@ -70,121 +105,29 @@ bot.command('help', (ctx) => {
         '• www.svoboda.org\n' +
         '• www.sibreal.org\n' +
         '• www.severreal.org\n' +
-        '• www.kavkazr.com\n'
+        '• www.kavkazr.com'
     );
 });
 
-// Command: /mirror <url>
 bot.command('mirror', async (ctx) => {
     const url = ctx.match?.toString().trim();
-
     if (!url) {
         await ctx.reply('Please provide a URL.\n\nExample: /mirror https://www.svoboda.org/a/article');
         return;
     }
-
-    // Check if should process
-    const { process, reason } = shouldProcessURL(ctx, url);
-
-    if (!process) {
-        if (reason === 'rate_limited') {
-            await ctx.reply('⏳ Please wait a moment before sending another request.');
-        } else if (reason === 'unsupported_domain') {
-            await ctx.reply('❌ This domain is not supported. Only RFE/RL websites are supported.');
-        } else if (reason === 'chat_not_allowed') {
-            await ctx.reply('❌ This bot is not available in this chat.');
-        } else {
-            await ctx.reply('❌ Invalid URL provided.');
-        }
-        return;
-    }
-
-    const statusMsg = await ctx.reply('🔄 Generating mirror URL...');
-
-    try {
-        const mirrorURL = await generateMirrorURL(url);
-
-        if (mirrorURL) {
-            await ctx.api.editMessageText(
-                ctx.chat.id,
-                statusMsg.message_id,
-                `✅ Mirror URL generated:\n\n${mirrorURL}`
-            );
-        } else {
-            await ctx.api.editMessageText(
-                ctx.chat.id,
-                statusMsg.message_id,
-                '❌ Unable to generate mirror URL. Make sure you\'re using a supported RFE/RL domain.'
-            );
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        await ctx.api.editMessageText(
-            ctx.chat.id,
-            statusMsg.message_id,
-            '❌ An error occurred while generating the mirror URL.'
-        );
-    }
+    await processURL(ctx, url);
 });
 
-// Handle any URL sent directly (without command)
+// Handle URLs sent directly
 bot.on('message:text', async (ctx) => {
     const text = ctx.message.text;
-
-    // Ignore if it's a command
     if (text.startsWith('/')) return;
 
-    // Check if message contains a URL
-    const urlRegex = /https?:\/\/[^\s]+/g;
-    const urls = text.match(urlRegex);
-
-    if (urls && urls.length > 0) {
-        const url = urls[0];
-
-        // Check if should process
-        const { process, reason } = shouldProcessURL(ctx, url);
-
-        if (!process) {
-            if (reason === 'rate_limited') {
-                await ctx.reply('⏳ Please wait a moment before sending another request.');
-            } else if (reason === 'unsupported_domain') {
-                await ctx.reply('❌ This domain is not supported. Only RFE/RL websites are supported.\n\nSupported sites:\n• www.svoboda.org\n• www.sibreal.org\n• www.severreal.org\n• www.kavkazr.com');
-            } else if (reason === 'chat_not_allowed') {
-                await ctx.reply('❌ This bot is not available in this chat.');
-            }
-            return;
-        };
-
-        const statusMsg = await ctx.reply('🔄 Generating mirror URL...');
-
-        try {
-            const mirrorURL = await generateMirrorURL(url);
-
-            if (mirrorURL) {
-                await ctx.api.editMessageText(
-                    ctx.chat.id,
-                    statusMsg.message_id,
-                    `✅ Mirror URL:\n\n${mirrorURL}`
-                );
-            } else {
-                await ctx.api.editMessageText(
-                    ctx.chat.id,
-                    statusMsg.message_id,
-                    '❌ This domain is not supported. Only RFE/RL websites are supported.'
-                );
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            await ctx.api.editMessageText(
-                ctx.chat.id,
-                statusMsg.message_id,
-                '❌ An error occurred while generating the mirror URL.'
-            );
-        }
+    const urlMatch = text.match(/https?:\/\/[^\s]+/);
+    if (urlMatch) {
+        await processURL(ctx, urlMatch[0]);
     }
 });
 
-// Start the bot
 bot.start();
-
 console.log('✅ Bot is running...');

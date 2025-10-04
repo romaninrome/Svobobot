@@ -3,7 +3,7 @@ import { config } from './config';
 
 interface ApiResponse {
     short_url?: string;
-}
+};
 
 function isValidURL(url: string): boolean {
     try {
