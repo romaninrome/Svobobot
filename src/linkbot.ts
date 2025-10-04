@@ -1,4 +1,4 @@
-import { Bot } from 'grammy';
+import { Bot, Context } from 'grammy';
 import { config } from './config';
 import { generateMirrorURL, MirrorURLResult } from './urlGenerator';
 import { domains } from './domains';
@@ -35,7 +35,8 @@ setInterval(() => {
     }
 }, cleanupInterval);
 
-function validateRequest(ctx: any, url: string): string | null {
+function validateRequest(ctx: Context, url: string): string | null {
+
     try {
         const urlObject = new URL(url);
         if (!domains[urlObject.hostname]) {
@@ -45,6 +46,12 @@ function validateRequest(ctx: any, url: string): string | null {
         return '❌ Invalid URL provided.';
     }
 
+    // Check user exists
+    if (!ctx.from?.id) {
+        return '❌ Cannot identify user.';
+    }
+
+    // Rate limit check 
     if (!checkRateLimit(ctx.from.id)) {
         return '⏳ Please wait a moment before sending another request.';
     }
@@ -57,7 +64,7 @@ function validateRequest(ctx: any, url: string): string | null {
     return null;
 };
 
-async function processURL(ctx: any, url: string): Promise<void> {
+async function processURL(ctx: Context, url: string): Promise<void> {
     const errorMessage = validateRequest(ctx, url);
     if (errorMessage) {
         await ctx.reply(errorMessage);
@@ -119,7 +126,7 @@ async function processURL(ctx: any, url: string): Promise<void> {
         await ctx.api.editMessageText(ctx.chat.id, statusMsg.message_id, finalMessage);
 
     } catch (error) {
-        console.error('Error:', error);
+        console.error('[Svobobot]Error:', error);
         await ctx.api.editMessageText(
             ctx.chat.id,
             statusMsg.message_id,
@@ -169,4 +176,4 @@ bot.on('message:text', async (ctx) => {
 });
 
 bot.start();
-console.log('✅ Bot is running...');
+console.log('✅[Svobobot] is running...');

@@ -26,9 +26,9 @@ function generateManualURL(originalUrl: URL, host: string): string {
 
 function fallbackToManual(urlObject: URL, host: string, reason: string, error?: unknown): string {
     if (error) {
-        console.error(`${reason}:`, error);
+        console.error(`[Svobobot]${reason}:`, error);
     } else {
-        console.warn(reason);
+        console.warn(`[Svobobot]${reason}`);
     }
     return generateManualURL(urlObject, host);
 };
@@ -63,20 +63,20 @@ async function generateShortURL(url: string, urlObject: URL, host: string): Prom
 
 export async function generateMirrorURL(url: string): Promise<MirrorURLResult> {
     if (!isValidURL(url)) {
-        console.error(`Invalid URL: ${url}`);
+        console.error(`[Svobobot]Invalid URL: ${url}`);
         return { success: false, error: 'invalid_url' };
     }
 
     const urlObject = new URL(url);
 
     if (!domains[urlObject.hostname]) {
-        console.warn(`Hostname ${urlObject.hostname} not found in domains list`);
+        console.warn(`[Svobobot]Hostname ${urlObject.hostname} not found in domains list`);
         return { success: false, error: 'unsupported_domain' };
     }
 
     const exists = await checkUrlExists(url);
     if (!exists) {
-        console.warn(`Article not found (404): ${url}`);
+        console.warn(`[Svobobot]Article not found (404): ${url}`);
         return { success: false, error: 'not_found' };
     }
 
@@ -85,7 +85,7 @@ export async function generateMirrorURL(url: string): Promise<MirrorURLResult> {
         const mirrorUrl = await generateShortURL(url, urlObject, host);
         return { success: true, url: mirrorUrl };
     } catch (error) {
-        console.error('Mirror URL generation failed after existence check', error);
+        console.error('[Svobobot]Mirror URL generation failed after existence check', error);
         return { success: false, error: 'generation_failure' };
     }
 };

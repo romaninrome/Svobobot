@@ -29,7 +29,7 @@ export async function checkUrlExists(url: string, timeoutMs: number = 5000): Pro
 
         return response.ok;
     } catch (error) {
-        console.warn(`Failed to check URL: ${url}`);
-        return true; // Assume exists if can't check
+        console.warn(`[Svobobot]Failed to check URL: ${url}`);
+        return false; // Overengineering is a mortal sin.
     }
 };

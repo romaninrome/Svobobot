@@ -3,11 +3,10 @@ import { GoogleGenAI } from "@google/genai";
 interface Summary {
     forFacebook: string;
     forTwitter: string;
-}
+};
 
-// Initialize with your API key
 const ai = new GoogleGenAI({
-    apiKey: process.env.GEMINI_API_KEY // Store your key in environment variables
+    apiKey: process.env.GEMINI_API_KEY // 
 });
 
 export async function generateSummary(title: string, body: string): Promise<Summary | null> {
@@ -32,7 +31,8 @@ TWITTER:
 [текст]`;
 
         const result = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+            // model: "gemini-2.5-flash" better but slower
+            model: "gemini-2.5-flash-lite",
             contents: prompt
         });
 
@@ -41,7 +41,7 @@ TWITTER:
         const twitterMatch = text.match(/TWITTER:\s*([\s\S]*?)$/i);
 
         if (!facebookMatch || !twitterMatch) {
-            console.error('Failed to parse AI response');
+            console.error('[Svobobot]Failed to parse AI response');
             return null;
         }
 
@@ -50,7 +50,7 @@ TWITTER:
             forTwitter: twitterMatch[1].trim()
         };
     } catch (error) {
-        console.error('AI error:', error);
+        console.error('[Svobobot]AI error:', error);
         return null;
     }
 };

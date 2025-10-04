@@ -5,7 +5,7 @@ interface Article {
     body: string;
 };
 
-const polAzara = 8000; // Max parsing text size
+const polAzara = 8000; // Max parsing text size. An insider joke, don't sweat it.
 
 export async function parseArticle(url: string): Promise<Article | null> {
     try {
@@ -29,8 +29,8 @@ export async function parseArticle(url: string): Promise<Article | null> {
             .replace(/\. /g, '.\n\n'); // paragraphs
 
         if (body.length > polAzara) {
+            console.log(`[Svobobot]Article truncated from ${body.length} to ${polAzara} chars`);
             body = body.substring(0, polAzara);
-            console.log(`Article truncated from ${body.length} to ${polAzara} chars`);
         }
 
         if (!title || !body || body.length < 100) {
@@ -39,7 +39,7 @@ export async function parseArticle(url: string): Promise<Article | null> {
 
         return { title, body };
     } catch (error) {
-        console.error('Parse error:', error);
+        console.error('[Svobobot]Parse error:', error);
         return null;
     }
 };
