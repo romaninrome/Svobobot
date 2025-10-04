@@ -57,51 +57,6 @@ function validateRequest(ctx: any, url: string): string | null {
     return null;
 };
 
-// async function processURL(ctx: any, url: string): Promise<void> {
-//     const errorMessage = validateRequest(ctx, url);
-//     if (errorMessage) {
-//         await ctx.reply(errorMessage);
-//         return;
-//     }
-
-//     const statusMsg = await ctx.reply('🔄 Generating mirror URL...');
-
-//     try {
-//         const result: MirrorURLResult = await generateMirrorURL(url);
-
-//         let finalMessage: string;
-
-//         if (result.success) {
-//             finalMessage = `✅ Mirror URL:\n\n${result.url}`;
-//         } else {
-//             switch (result.error) {
-//                 case 'not_found':
-//                     finalMessage = "❌ There is no article (404). You don't need to save it from censorship.";
-//                     break;
-//                 case 'invalid_url':
-//                     finalMessage = '❌ Invalid URL format.';
-//                     break;
-//                 case 'unsupported_domain':
-//                     finalMessage = '❌ This domain is not supported. Only RFE/RL Russian Service websites are supported.';
-//                     break;
-//                 case 'generation_failure':
-//                 default:
-//                     finalMessage = '❌ Unable to generate mirror URL due to an API error. Please try again.';
-//                     break;
-//             }
-//         }
-
-//         await ctx.api.editMessageText(ctx.chat.id, statusMsg.message_id, finalMessage);
-//     } catch (error) {
-//         console.error('Error:', error);
-//         await ctx.api.editMessageText(
-//             ctx.chat.id,
-//             statusMsg.message_id,
-//             '❌ An error occurred while generating the mirror URL.'
-//         );
-//     }
-// };
-
 async function processURL(ctx: any, url: string): Promise<void> {
     const errorMessage = validateRequest(ctx, url);
     if (errorMessage) {
@@ -159,7 +114,7 @@ async function processURL(ctx: any, url: string): Promise<void> {
             return;
         }
 
-        const finalMessage = `📘 Facebook:\n${summary.forFacebook}\n\n🐦 Twitter:\n${summary.forTwitter}\n\n🔗 Mirror:\n${mirrorUrl}`;
+        const finalMessage = `📘 Facebook:\n${summary.forFacebook}\n\n${mirrorUrl}\n\n🦅 Twitter:\n${summary.forTwitter}\n\n${mirrorUrl}`;
 
         await ctx.api.editMessageText(ctx.chat.id, statusMsg.message_id, finalMessage);
 

@@ -5,6 +5,8 @@ interface Article {
     body: string;
 };
 
+const polAzara = 8000; // Max parsing text size
+
 export async function parseArticle(url: string): Promise<Article | null> {
     try {
         const response = await fetch(url);
@@ -16,7 +18,7 @@ export async function parseArticle(url: string): Promise<Article | null> {
         const title = $('h1.pg-title').text().trim() || $('h1').first().text().trim();
 
         // All text
-        const body = $('.wsw')
+        let body = $('.wsw')
             .clone()
             .find('script, style, iframe') // Remove exceed 
             .remove()
@@ -25,6 +27,11 @@ export async function parseArticle(url: string): Promise<Article | null> {
             .trim()
             .replace(/\s+/g, ' ') // spaces
             .replace(/\. /g, '.\n\n'); // paragraphs
+
+        if (body.length > polAzara) {
+            body = body.substring(0, polAzara);
+            console.log(`Article truncated from ${body.length} to ${polAzara} chars`);
+        }
 
         if (!title || !body || body.length < 100) {
             return null;
