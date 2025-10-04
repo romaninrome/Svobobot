@@ -1,4 +1,3 @@
-// urlGenerator.ts
 import { domains } from './domains';
 import { config } from './config';
 
@@ -13,51 +12,52 @@ function isValidURL(url: string): boolean {
     } catch {
         return false;
     }
-}
+};
+
+function addUtmParams(url: URL): void {
+    url.searchParams.set('utm_medium', 'proxy');
+    url.searchParams.set('utm_campaign', 'otf');
+    url.searchParams.set('utm_source', 'otf');
+};
 
 function generateManualURL(originalUrl: URL, host: string): string {
-    // Clone URL to avoid mutating the input
     const urlObject = new URL(originalUrl.toString());
+    addUtmParams(urlObject);
 
-    // Add UTM parameters
-    urlObject.searchParams.set('utm_medium', 'proxy');
-    urlObject.searchParams.set('utm_campaign', 'otf');
-    urlObject.searchParams.set('utm_source', 'otf');
-
-    // Build new URL with mirror domain
     const query = urlObject.searchParams.toString();
-    const newUrl = `${urlObject.protocol}//${host}${urlObject.pathname}${query ? `?${query}` : ''}${urlObject.hash}`;
+    return `${urlObject.protocol}//${host}${urlObject.pathname}${query ? `?${query}` : ''}${urlObject.hash}`;
+};
 
-    return newUrl;
-}
+function fallbackToManual(urlObject: URL, host: string, reason: string, error?: unknown): string {
+    if (error) {
+        console.error(`${reason}:`, error);
+    } else {
+        console.warn(reason);
+    }
+    return generateManualURL(urlObject, host);
+};
 
 async function generateShortURL(url: string, urlObject: URL, host: string): Promise<string> {
     try {
         const response = await fetch(`${config.apiUrl}/?url=${encodeURIComponent(url)}`, {
             method: 'GET',
-            headers: {
-                'Authorization': config.authToken
-            }
+            headers: { 'Authorization': config.authToken }
         });
 
         if (!response.ok) {
-            console.warn(`API error: ${response.status}. Falling back to manual generation.`);
-            return generateManualURL(urlObject, host);
+            return fallbackToManual(urlObject, host, `API error: ${response.status}`);
         }
 
         const data: ApiResponse = await response.json();
-
         if (data.short_url && isValidURL(data.short_url)) {
             return data.short_url;
-        } else {
-            console.warn('Short URL API returned invalid or empty url. Falling back to manual generation.');
-            return generateManualURL(urlObject, host);
         }
+
+        return fallbackToManual(urlObject, host, 'Short URL API returned invalid or empty url.');
     } catch (error) {
-        console.error('Error fetching from API. Falling back to manual generation:', error);
-        return generateManualURL(urlObject, host);
+        return fallbackToManual(urlObject, host, 'Error fetching from API', error);
     }
-}
+};
 
 export async function generateMirrorURL(url: string): Promise<string | null> {
     if (!isValidURL(url)) {
@@ -75,4 +75,4 @@ export async function generateMirrorURL(url: string): Promise<string | null> {
     const host = domains[urlObject.hostname];
 
     return await generateShortURL(url, urlObject, host);
-}
+};
