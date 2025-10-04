@@ -6,6 +6,10 @@ interface ApiResponse {
     short_url?: string;
 };
 
+export type MirrorURLResult =
+    | { success: true; url: string }
+    | { success: false; error: 'not_found' | 'generation_failure' };
+
 function addUtmParams(url: URL): void {
     url.searchParams.set('utm_medium', 'proxy');
     url.searchParams.set('utm_campaign', 'otf');
@@ -32,7 +36,7 @@ function fallbackToManual(urlObject: URL, host: string, reason: string, error?: 
 async function generateShortURL(url: string, urlObject: URL, host: string): Promise<string> {
     try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 10000);  // 10 second timeout
+        const timeout = setTimeout(() => controller.abort(), 10000);
 
         const response = await fetch(`${config.apiUrl}/?url=${encodeURIComponent(url)}`, {
             method: 'GET',
@@ -57,27 +61,18 @@ async function generateShortURL(url: string, urlObject: URL, host: string): Prom
     }
 };
 
-export async function generateMirrorURL(url: string): Promise<string | null> {
-    if (!isValidURL(url)) {
-        console.error(`Invalid URL: ${url}`);
-        return null;
-    }
-
-    const urlObject = new URL(url);
-
-    if (!domains[urlObject.hostname]) {
-        console.warn(`Hostname ${urlObject.hostname} not found in domains list`);
-        return null;
-    }
-
-    // Check if article exists
+export async function generateMirrorURL(url: string, urlObject: URL, host: string): Promise<MirrorURLResult> {
     const exists = await checkUrlExists(url);
-    if (exists === false) {  // Only block if definitely 404
+    if (exists === false) {
         console.warn(`Article not found (404): ${url}`);
-        return null;
+        return { success: false, error: 'not_found' };
     }
-    // If exists === null (unknown), continue anyway
 
-    const host = domains[urlObject.hostname];
-    return await generateShortURL(url, urlObject, host);
+    try {
+        const mirrorUrl = await generateShortURL(url, urlObject, host);
+        return { success: true, url: mirrorUrl };
+    } catch (e) {
+        console.error('Mirror URL generation failed after existence check', e);
+        return { success: false, error: 'generation_failure' };
+    }
 };
