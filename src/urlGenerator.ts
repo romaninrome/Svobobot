@@ -8,7 +8,7 @@ interface ApiResponse {
 
 export type MirrorURLResult =
     | { success: true; url: string }
-    | { success: false; error: 'not_found' | 'generation_failure' };
+    | { success: false; error: 'invalid_url' | 'unsupported_domain' | 'not_found' | 'generation_failure' };
 
 function addUtmParams(url: URL): void {
     url.searchParams.set('utm_medium', 'proxy');
@@ -61,18 +61,31 @@ async function generateShortURL(url: string, urlObject: URL, host: string): Prom
     }
 };
 
-export async function generateMirrorURL(url: string, urlObject: URL, host: string): Promise<MirrorURLResult> {
+export async function generateMirrorURL(url: string): Promise<MirrorURLResult> {
+    if (!isValidURL(url)) {
+        console.error(`Invalid URL: ${url}`);
+        return { success: false, error: 'invalid_url' };
+    }
+
+    const urlObject = new URL(url);
+
+    if (!domains[urlObject.hostname]) {
+        console.warn(`Hostname ${urlObject.hostname} not found in domains list`);
+        return { success: false, error: 'unsupported_domain' };
+    }
+
     const exists = await checkUrlExists(url);
-    if (exists === false) {
+    if (!exists) {
         console.warn(`Article not found (404): ${url}`);
         return { success: false, error: 'not_found' };
     }
 
     try {
+        const host = domains[urlObject.hostname];
         const mirrorUrl = await generateShortURL(url, urlObject, host);
         return { success: true, url: mirrorUrl };
-    } catch (e) {
-        console.error('Mirror URL generation failed after existence check', e);
+    } catch (error) {
+        console.error('Mirror URL generation failed after existence check', error);
         return { success: false, error: 'generation_failure' };
     }
 };

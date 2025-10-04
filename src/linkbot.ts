@@ -37,7 +37,7 @@ function validateRequest(ctx: any, url: string): string | null {
     try {
         const urlObject = new URL(url);
         if (!domains[urlObject.hostname]) {
-            return '❌ This domain is not supported. Only RFE/RL websites are supported.';
+            return '❌ This domain is not supported. Only RFE/RL Russian Service websites are supported.';
         }
     } catch {
         return '❌ Invalid URL provided.';
@@ -65,10 +65,7 @@ async function processURL(ctx: any, url: string): Promise<void> {
     const statusMsg = await ctx.reply('🔄 Generating mirror URL...');
 
     try {
-        const urlObject = new URL(url);
-        const host = domains[urlObject.hostname];
-
-        const result: MirrorURLResult = await generateMirrorURL(url, urlObject, host);
+        const result: MirrorURLResult = await generateMirrorURL(url);
 
         let finalMessage: string;
 
@@ -77,7 +74,13 @@ async function processURL(ctx: any, url: string): Promise<void> {
         } else {
             switch (result.error) {
                 case 'not_found':
-                    finalMessage = "❌ Article not found (404). You do not need to save it from censorship.";
+                    finalMessage = "❌ There is no article (404). You don't need to save it from censorship.";
+                    break;
+                case 'invalid_url':
+                    finalMessage = '❌ Invalid URL format.';
+                    break;
+                case 'unsupported_domain':
+                    finalMessage = '❌ This domain is not supported. Only RFE/RL Russian Service websites are supported.';
                     break;
                 case 'generation_failure':
                 default:

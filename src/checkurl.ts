@@ -10,8 +10,7 @@ export function isValidURL(url: string): boolean {
 /**
  * Checks if URL exists and returns non-404 status
  */
-
-export async function checkUrlExists(url: string, timeoutMs: number = 5000): Promise<boolean | null> {
+export async function checkUrlExists(url: string, timeoutMs: number = 5000): Promise<boolean> {
     try {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), timeoutMs);
@@ -24,11 +23,13 @@ export async function checkUrlExists(url: string, timeoutMs: number = 5000): Pro
 
         clearTimeout(timeout);
 
-        if (response.status === 404) return false;  // Definitely doesn't exist
-        if (response.ok) return true;               // Definitely exists
-        return null;                                 // Unknown (5xx, etc.)
+        if (response.status === 404) {
+            return false;
+        }
+
+        return response.ok;
     } catch (error) {
         console.warn(`Failed to check URL: ${url}`);
-        return null;  // Unknown - don't block generation
+        return true; // Assume exists if can't check
     }
 };
