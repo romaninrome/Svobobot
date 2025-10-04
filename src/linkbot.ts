@@ -2,6 +2,8 @@ import { Bot } from 'grammy';
 import { config } from './config';
 import { generateMirrorURL, MirrorURLResult } from './urlGenerator';
 import { domains } from './domains';
+import { parseArticle } from './htmlparser';
+import { generateSummary } from './summariser';
 
 const bot = new Bot(config.telegramToken);
 
@@ -55,6 +57,51 @@ function validateRequest(ctx: any, url: string): string | null {
     return null;
 };
 
+// async function processURL(ctx: any, url: string): Promise<void> {
+//     const errorMessage = validateRequest(ctx, url);
+//     if (errorMessage) {
+//         await ctx.reply(errorMessage);
+//         return;
+//     }
+
+//     const statusMsg = await ctx.reply('🔄 Generating mirror URL...');
+
+//     try {
+//         const result: MirrorURLResult = await generateMirrorURL(url);
+
+//         let finalMessage: string;
+
+//         if (result.success) {
+//             finalMessage = `✅ Mirror URL:\n\n${result.url}`;
+//         } else {
+//             switch (result.error) {
+//                 case 'not_found':
+//                     finalMessage = "❌ There is no article (404). You don't need to save it from censorship.";
+//                     break;
+//                 case 'invalid_url':
+//                     finalMessage = '❌ Invalid URL format.';
+//                     break;
+//                 case 'unsupported_domain':
+//                     finalMessage = '❌ This domain is not supported. Only RFE/RL Russian Service websites are supported.';
+//                     break;
+//                 case 'generation_failure':
+//                 default:
+//                     finalMessage = '❌ Unable to generate mirror URL due to an API error. Please try again.';
+//                     break;
+//             }
+//         }
+
+//         await ctx.api.editMessageText(ctx.chat.id, statusMsg.message_id, finalMessage);
+//     } catch (error) {
+//         console.error('Error:', error);
+//         await ctx.api.editMessageText(
+//             ctx.chat.id,
+//             statusMsg.message_id,
+//             '❌ An error occurred while generating the mirror URL.'
+//         );
+//     }
+// };
+
 async function processURL(ctx: any, url: string): Promise<void> {
     const errorMessage = validateRequest(ctx, url);
     if (errorMessage) {
@@ -62,40 +109,66 @@ async function processURL(ctx: any, url: string): Promise<void> {
         return;
     }
 
-    const statusMsg = await ctx.reply('🔄 Generating mirror URL...');
+    const statusMsg = await ctx.reply('🔄 Processing article...');
 
     try {
         const result: MirrorURLResult = await generateMirrorURL(url);
 
-        let finalMessage: string;
-
-        if (result.success) {
-            finalMessage = `✅ Mirror URL:\n\n${result.url}`;
-        } else {
+        if (!result.success) {
+            let finalMessage: string;
             switch (result.error) {
                 case 'not_found':
-                    finalMessage = "❌ There is no article (404). You don't need to save it from censorship.";
+                    finalMessage = '❌ Article not found (404).';
                     break;
                 case 'invalid_url':
                     finalMessage = '❌ Invalid URL format.';
                     break;
                 case 'unsupported_domain':
-                    finalMessage = '❌ This domain is not supported. Only RFE/RL Russian Service websites are supported.';
+                    finalMessage = '❌ Domain not supported.';
                     break;
-                case 'generation_failure':
                 default:
-                    finalMessage = '❌ Unable to generate mirror URL due to an API error. Please try again.';
-                    break;
+                    finalMessage = '❌ Unable to generate mirror URL.';
             }
+            await ctx.api.editMessageText(ctx.chat.id, statusMsg.message_id, finalMessage);
+            return;
         }
 
+        const mirrorUrl = result.url;
+
+        await ctx.api.editMessageText(ctx.chat.id, statusMsg.message_id, '📖 Parsing article...');
+        const article = await parseArticle(url);
+
+        if (!article) {
+            await ctx.api.editMessageText(
+                ctx.chat.id,
+                statusMsg.message_id,
+                `✅ Mirror URL:\n\n${mirrorUrl}\n\n⚠️ Could not parse article.`
+            );
+            return;
+        }
+
+        await ctx.api.editMessageText(ctx.chat.id, statusMsg.message_id, '🤖 Generating summaries...');
+        const summary = await generateSummary(article.title, article.body);
+
+        if (!summary) {
+            await ctx.api.editMessageText(
+                ctx.chat.id,
+                statusMsg.message_id,
+                `✅ Mirror URL:\n\n${mirrorUrl}\n\n⚠️ Could not generate summaries.`
+            );
+            return;
+        }
+
+        const finalMessage = `📘 Facebook:\n${summary.forFacebook}\n\n🐦 Twitter:\n${summary.forTwitter}\n\n🔗 Mirror:\n${mirrorUrl}`;
+
         await ctx.api.editMessageText(ctx.chat.id, statusMsg.message_id, finalMessage);
+
     } catch (error) {
         console.error('Error:', error);
         await ctx.api.editMessageText(
             ctx.chat.id,
             statusMsg.message_id,
-            '❌ An error occurred while generating the mirror URL.'
+            '❌ Processing error occurred.'
         );
     }
 };
