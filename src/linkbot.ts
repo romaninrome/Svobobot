@@ -1,7 +1,6 @@
 import { Bot } from 'grammy';
 import { config } from './config';
 import { generateMirrorURL } from './urlGenerator';
-import { domains } from './domains';
 
 const bot = new Bot(config.telegramToken);
 
@@ -16,9 +15,7 @@ function checkRateLimit(userId: number): boolean {
     const userTimes = userRequestTimes.get(userId) || [];
     const recentTimes = userTimes.filter(time => now - time < rateLimitWindow);
 
-    if (recentTimes.length >= maxRequests
-
-    ) {
+    if (recentTimes.length >= maxRequests) {
         return false; // Rate limited
     }
 
@@ -37,16 +34,6 @@ setInterval(() => {
 }, cleanupInterval);
 
 function validateRequest(ctx: any, url: string): string | null {
-    // Validate URL format
-    try {
-        const urlObject = new URL(url);
-        if (!domains[urlObject.hostname]) {
-            return '❌ This domain is not supported. Only RFE/RL websites are supported.';
-        }
-    } catch {
-        return '❌ Invalid URL provided.';
-    }
-
     // Check rate limit
     if (!checkRateLimit(ctx.from.id)) {
         return '⏳ Please wait a moment before sending another request.';
@@ -72,9 +59,10 @@ async function processURL(ctx: any, url: string): Promise<void> {
 
     try {
         const mirrorURL = await generateMirrorURL(url);
+
         const message = mirrorURL
             ? `✅ Mirror URL:\n\n${mirrorURL}`
-            : '❌ Unable to generate mirror URL. Make sure you\'re using a supported RFE/RL domain.';
+            : '❌ Unable to generate mirror URL. Please check the URL and try again.';
 
         await ctx.api.editMessageText(ctx.chat.id, statusMsg.message_id, message);
     } catch (error) {

@@ -1,17 +1,9 @@
 import { domains } from './domains';
 import { config } from './config';
+import { isValidURL, checkUrlExists } from './checkurl';
 
 interface ApiResponse {
     short_url?: string;
-};
-
-function isValidURL(url: string): boolean {
-    try {
-        new URL(url);
-        return true;
-    } catch {
-        return false;
-    }
 };
 
 function addUtmParams(url: URL): void {
@@ -39,10 +31,16 @@ function fallbackToManual(urlObject: URL, host: string, reason: string, error?: 
 
 async function generateShortURL(url: string, urlObject: URL, host: string): Promise<string> {
     try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 10000);  // 10 second timeout
+
         const response = await fetch(`${config.apiUrl}/?url=${encodeURIComponent(url)}`, {
             method: 'GET',
-            headers: { 'Authorization': config.authToken }
+            headers: { 'Authorization': config.authToken },
+            signal: controller.signal
         });
+
+        clearTimeout(timeout);
 
         if (!response.ok) {
             return fallbackToManual(urlObject, host, `API error: ${response.status}`);
@@ -72,7 +70,14 @@ export async function generateMirrorURL(url: string): Promise<string | null> {
         return null;
     }
 
-    const host = domains[urlObject.hostname];
+    // Check if article exists
+    const exists = await checkUrlExists(url);
+    if (exists === false) {  // Only block if definitely 404
+        console.warn(`Article not found (404): ${url}`);
+        return null;
+    }
+    // If exists === null (unknown), continue anyway
 
+    const host = domains[urlObject.hostname];
     return await generateShortURL(url, urlObject, host);
 };
