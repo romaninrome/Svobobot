@@ -1,3 +1,4 @@
+// urlGenerator.ts
 import { domains } from './domains';
 import { config } from './config';
 
@@ -14,72 +15,64 @@ function isValidURL(url: string): boolean {
     }
 }
 
-function generateManualURL(url: string): string | null {
-    try {
-        const urlObject = new URL(url);
+function generateManualURL(originalUrl: URL, host: string): string {
+    // Clone URL to avoid mutating the input
+    const urlObject = new URL(originalUrl.toString());
 
-        if (!domains[urlObject.hostname]) {
-            console.log(`Hostname ${urlObject.hostname} not found in domains list`);
-            return null;
-        }
+    // Add UTM parameters
+    urlObject.searchParams.set('utm_medium', 'proxy');
+    urlObject.searchParams.set('utm_campaign', 'otf');
+    urlObject.searchParams.set('utm_source', 'otf');
 
-        const host = domains[urlObject.hostname];
+    // Build new URL with mirror domain
+    const query = urlObject.searchParams.toString();
+    const newUrl = `${urlObject.protocol}//${host}${urlObject.pathname}${query ? `?${query}` : ''}${urlObject.hash}`;
 
-        // Add UTM parameters
-        urlObject.searchParams.set('utm_medium', 'proxy');
-        urlObject.searchParams.set('utm_campaign', 'otf');
-        urlObject.searchParams.set('utm_source', 'otf');
-
-        // Build new URL with mirror domain
-        const newUrl = `${urlObject.protocol}//${host}${urlObject.pathname}?${urlObject.searchParams.toString()}${urlObject.hash}`;
-
-        return newUrl;
-    } catch (error) {
-        console.error('Error generating manual URL:', error);
-        return null;
-    }
+    return newUrl;
 }
 
-async function generateShortURL(url: string): Promise<string | null> {
+async function generateShortURL(url: string, urlObject: URL, host: string): Promise<string> {
     try {
-        const urlObject = new URL(url);
-
-        if (!domains[urlObject.hostname]) {
-            console.log(`Hostname ${urlObject.hostname} not found in domains list`);
-            return null;
-        }
-
         const response = await fetch(`${config.apiUrl}/?url=${encodeURIComponent(url)}`, {
             method: 'GET',
             headers: {
-                'Content-Type': 'application/json',
                 'Authorization': config.authToken
             }
         });
 
         if (!response.ok) {
-            console.error(`API error: ${response.status}`);
-            return generateManualURL(url);
+            console.warn(`API error: ${response.status}. Falling back to manual generation.`);
+            return generateManualURL(urlObject, host);
         }
 
         const data: ApiResponse = await response.json();
 
-        if (data.short_url && data.short_url.length > 5) {
+        if (data.short_url && isValidURL(data.short_url)) {
             return data.short_url;
         } else {
-            return generateManualURL(url);
+            console.warn('Short URL API returned invalid or empty url. Falling back to manual generation.');
+            return generateManualURL(urlObject, host);
         }
     } catch (error) {
-        console.error('Error fetching from API:', error);
-        return generateManualURL(url);
+        console.error('Error fetching from API. Falling back to manual generation:', error);
+        return generateManualURL(urlObject, host);
     }
 }
 
 export async function generateMirrorURL(url: string): Promise<string | null> {
     if (!isValidURL(url)) {
-        console.error('Invalid URL');
+        console.error(`Invalid URL: ${url}`);
         return null;
     }
 
-    return await generateShortURL(url);
+    const urlObject = new URL(url);
+
+    if (!domains[urlObject.hostname]) {
+        console.warn(`Hostname ${urlObject.hostname} not found in domains list`);
+        return null;
+    }
+
+    const host = domains[urlObject.hostname];
+
+    return await generateShortURL(url, urlObject, host);
 }

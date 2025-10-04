@@ -7,17 +7,17 @@ const bot = new Bot(config.telegramToken);
 
 // Rate limiting
 const userRequestTimes = new Map<number, number[]>();
-const RATE_LIMIT_WINDOW = 60000; // 1 minute
-const MAX_REQUESTS = 5; // 5 requests per minute
+const rateLimitWindow = 60000; // 1 minute
+const maxRequests = 5; // 5 requests per minute
 
 function isRateLimited(userId: number): boolean {
     const now = Date.now();
     const userTimes = userRequestTimes.get(userId) || [];
 
     // Remove timestamps older than the window
-    const recentTimes = userTimes.filter(time => now - time < RATE_LIMIT_WINDOW);
+    const recentTimes = userTimes.filter(time => now - time < rateLimitWindow);
 
-    if (recentTimes.length >= MAX_REQUESTS) {
+    if (recentTimes.length >= maxRequests) {
         return true;
     }
 
