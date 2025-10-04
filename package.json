@@ -1,24 +1,16 @@
 {
   "name": "linkbot",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.2.0",
+  "description": "Link shortener for RFE/RL sites",
   "type": "module",
   "scripts": {
-    "dev": "tsx src/index.ts",
-    "build": "tsc",
-    "start": "node dist/index.js"
+    "dev": "bun --watch src/index.ts",
+    "start": "bun src/index.ts"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "roman_in_rome",
+  "license": "GNU",
   "dependencies": {
-    "dotenv": "^17.2.3",
     "grammy": "^1.38.2"
-  },
-  "devDependencies": {
-    "@types/node": "^24.6.2",
-    "tsx": "^4.7.0",
-    "typescript": "^5.9.3"
   }
 }
