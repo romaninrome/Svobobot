@@ -4,8 +4,8 @@
   "description": "Link shortener for RFE/RL sites",
   "type": "module",
   "scripts": {
-    "dev": "bun --watch src/index.ts",
-    "start": "bun src/index.ts"
+    "dev": "bun --watch src/linkbot.ts",
+    "start": "bun src/linkbot.ts"
   },
   "keywords": [],
   "author": "roman_in_rome",
