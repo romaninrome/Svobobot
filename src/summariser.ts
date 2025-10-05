@@ -11,24 +11,25 @@ const ai = new GoogleGenAI({
 
 export async function generateSummary(title: string, body: string): Promise<Summary | null> {
     try {
-        const prompt = `Ты журналист Радио Свобода. Перескажи эту новость в двух форматах:
+        const prompt = `You are a journalist for Radio Svoboda. Retell this news in two formats.
 
-НОВОСТЬ:
-Заголовок: ${title}
-Текст: ${body.length > 8000 ? body.substring(0, 8000) + '...' : body}
+NEWS:
+Title: ${title}
+Text: ${body.length > 8000 ? body.substring(0, 8000) + '...' : body}
+${body.length > 8000 ? 'ATTENTION: Text truncated to 8000 characters. Retell only what is provided here.' : ''}
 
-${body.length > 8000 ? 'ВНИМАНИЕ: Текст обрезан до 8000 символов. Пересказывай только то, что здесь.' : ''}
+TASK:
+1. Facebook post (50-100 words): Neutral tone, key facts, well-structured
+2. X (Twitter) post (maximum 250 characters): No sensational headlines, only the most important information, no hashtags
 
-ЗАДАНИЕ:
-1. Facebook пост (50-100 слов): Нейтральный тон, ключевые факты, структурировано
-2. Пост для X (Twitter) (максимум 250 символов): Без кричащих заголовков, только самое важное, без хештегов.
+CRITICAL: Write your entire response in the SAME LANGUAGE as the original news article above.
 
-Ответь в формате:
+Response format:
 FACEBOOK:
-[текст]
+[text in article's language]
 
 TWITTER:
-[текст]`;
+[text in article's language]`;
 
         const result = await ai.models.generateContent({
             // model: "gemini-2.5-flash" better but slower

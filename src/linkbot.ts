@@ -40,7 +40,7 @@ function validateRequest(ctx: Context, url: string): string | null {
     try {
         const urlObject = new URL(url);
         if (!domains[urlObject.hostname]) {
-            return '❌ This domain is not supported. Only RFE/RL Russian Service websites are supported.';
+            return '❌ This domain is not supported. Only RFE/RL  websites are supported (well, most of them).';
         }
     } catch {
         return '❌ Invalid URL provided.';
@@ -147,12 +147,7 @@ bot.command('start', (ctx) => {
 
 bot.command('help', (ctx) => {
     ctx.reply(
-        'Just send me a URL from any RFE/RL website and I\'ll create a mirror link that works in restricted regions.\n\n' +
-        'Supported sites:\n' +
-        '• www.svoboda.org\n' +
-        '• www.sibreal.org\n' +
-        '• www.severreal.org\n' +
-        '• www.kavkazr.com'
+        'Just send me a URL from any RFE/RL website and I\'ll create a mirror link that works in restricted regions.\n\n'
     );
 });
 
