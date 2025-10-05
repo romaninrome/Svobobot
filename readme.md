@@ -2,13 +2,13 @@
 
 Telegram bot for RFE/RL articles: generates mirror URLs and AI summaries for restricted regions.
 
-## Features
+## 📋 Overview
 
-- 🔗 Mirror URL generation with fallback
-- 📝 AI summaries for Facebook/Twitter
-- 📰 Full article parsing
-- ✅ 404 checking before processing
-- 🌍 31 supported domains
+Svobobot helps circumvent censorship by:
+- 🔗 Mirror URL generation for blocked RFE/RL content
+- Generating AI summaries optimised for social media (Facebook & X)
+- 📰 Full article parsing from 30+ RFE/RL domains
+- Validating URLs before processing (404 checking)
 
 ## Environment Variables
 
@@ -19,7 +19,7 @@ GEMINI_API_KEY=xxx
 # Optional
 API_URL=https://your-api.com
 AUTH_TOKEN=xxx
-ALLOWED_CHAT_IDS=123,456 (remove this if you make it public)
+ALLOWED_CHAT_IDS=123,456 (Telegram chat IDs. Remove this if you make it public)
 ```
 
 ## Usage
@@ -47,7 +47,7 @@ summariser.ts     # AI summaries
 checkurl.ts       # URL validation
 config.ts         # Config
 domains.ts        # Domain mappings
-test-domains.test.ts  # Domain health checker
+.env.example      # API keys file mock-up 
 ```
 
 ## Licence
@@ -60,4 +60,4 @@ MIT © 2025 Roman Mohuczy
 
 ---
 
-*"Overengineering is a mortal sin"*
+*The only security of all is in a free press, the force of public opinion cannot be resisted, when permitted freely to be expressed*

@@ -1,6 +1,6 @@
 {
   "name": "linkbot",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Link shortener for RFE/RL sites",
   "type": "module",
   "scripts": {
@@ -12,6 +12,6 @@
   "license": "GNU",
   "dependencies": {
     "@google/genai": "^1.22.0",
-    "grammy": "^1.38.2"
+    "grammy": "^1.38.3"
   }
 }
