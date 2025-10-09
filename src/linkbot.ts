@@ -1,11 +1,11 @@
 import { Bot, Context } from 'grammy';
 import { config } from './config';
-import { generateMirrorURL, MirrorURLResult } from './urlGenerator';
+import { generateMirrorURL, MirrorURLResult } from './urlgenerator';
 import { domains } from './domains';
 import { parseArticle } from './htmlparser';
 import { generateSummary } from './summariser';
 import { botLogger } from './logger';
-import { errorHandler } from './errorHandler';
+import { errorHandler } from './errorhandler';
 
 const bot = new Bot(config.telegramToken);
 

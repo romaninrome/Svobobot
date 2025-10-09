@@ -43,12 +43,14 @@ Supported domains:
 
 ```
 linkbot.ts        # Main bot
-urlGenerator.ts   # Mirror generation
+urlgenerator.ts   # Mirror generation
 htmlparser.ts     # Article extraction
 summariser.ts     # AI summaries
 checkurl.ts       # URL validation
 config.ts         # Config
 domains.ts        # Domain mappings
+errorhandler.ts   # Main module handler
+logger.ts         # Logger with Pino
 .env.example      # API keys file mock-up
 ```
 
