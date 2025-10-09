@@ -4,6 +4,7 @@ import { generateMirrorURL, MirrorURLResult } from './urlGenerator';
 import { domains } from './domains';
 import { parseArticle } from './htmlparser';
 import { generateSummary } from './summariser';
+import { botLogger } from './logger';
 
 const bot = new Bot(config.telegramToken);
 
