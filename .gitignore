@@ -7,4 +7,4 @@ dist/
 .DS_Store
 *.test.*
 *.log
-.prettiersrc
+.prettierrc
