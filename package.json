@@ -1,19 +1,24 @@
 {
-  "name": "linkbot",
-  "version": "1.1",
-  "description": "Link shortener for RFE/RL sites",
-  "type": "module",
-  "scripts": {
-    "dev": "bun --watch src/linkbot.ts",
-    "start": "bun src/linkbot.ts"
-  },
-  "keywords": [],
-  "author": "roman_in_rome",
-  "license": "GNU",
-  "dependencies": {
-    "@google/genai": "^1.22.0",
-    "grammy": "^1.38.3",
-    "pino": "^10.0.0",
-    "pino-pretty": "^13.1.1"
-  }
+    "name": "linkbot",
+    "version": "1.5",
+    "description": "Link shortener for RFE/RL sites",
+    "type": "module",
+    "scripts": {
+        "dev": "bun --watch src/linkbot.ts",
+        "start": "bun src/linkbot.ts",
+        "format": "prettier --write 'src/**/*.{ts,js,json,md}'"
+    },
+    "keywords": [],
+    "author": "roman_in_rome",
+    "license": "MIT",
+    "dependencies": {
+        "@google/genai": "^1.22.0",
+        "grammy": "^1.38.3",
+        "cheerio": "^1.1.2",
+        "pino": "^10.0.0",
+        "pino-pretty": "^13.1.1"
+    },
+    "devDependencies": {
+        "prettier": "^3.6.2"
+    }
 }

@@ -5,8 +5,8 @@ const isProd = process.env.NODE_ENV === 'production';
 const pinoOptions: pino.LoggerOptions = {
     level: process.env.LOG_LEVEL || 'info',
     base: {
-        bot: 'svobobot'
-    }
+        bot: 'svobobot',
+    },
 };
 
 if (!isProd) {
@@ -29,4 +29,3 @@ if (!isProd) {
 }
 
 export const botLogger = pino(pinoOptions);
-
