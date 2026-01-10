@@ -7,3 +7,4 @@ dist/
 *.test.*
 *.log
 .prettierrc
+package-lock.json
