@@ -1,6 +1,6 @@
 export const config = {
     telegramToken: process.env.TELEGRAM_BOT_TOKEN || '',
-    apiUrl: process.env.API_URL || '',
+    apiUrl: process.env.API_URL ?? 'https://smarturl.click/link',
     authToken: process.env.AUTH_TOKEN || '',
     allowedChats:
         process.env.ALLOWED_CHAT_IDS?.split(',')

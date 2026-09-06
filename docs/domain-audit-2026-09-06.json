@@ -1,0 +1,378 @@
+{
+  "checkedOn": "2026-09-06",
+  "method": "HTTPS HEAD with redirects, 12-second timeout; exit 6 means curl could not resolve the hostname. A homepage response does not verify every article.",
+  "results": [
+    {
+      "kind": "original",
+      "host": "da.azadiradio.com",
+      "result": "200 https://da.azadiradio.com/",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d1o1dnkfyuudx9.cloudfront.net",
+      "result": "000 https://d1o1dnkfyuudx9.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "pa.azadiradio.com",
+      "result": "200 https://pa.azadiradio.com/",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d10z1erkm7jz8z.cloudfront.net",
+      "result": "000 https://d10z1erkm7jz8z.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "www.mashaalradio.com",
+      "result": "200 https://www.mashaalradio.com/",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d36fe2ht431omh.cloudfront.net",
+      "result": "000 https://d36fe2ht431omh.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "www.azadliq.org",
+      "result": "200 https://www.azadliq.org/",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d2a8xmf1c9fo9h.cloudfront.net",
+      "result": "000 https://d2a8xmf1c9fo9h.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "www.svaboda.org",
+      "result": "200 https://www.svaboda.org/",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d2r0s1pmhg5xrd.cloudfront.net",
+      "result": "000 https://d2r0s1pmhg5xrd.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "www.radiotavisupleba.ge",
+      "result": "200 https://www.radiotavisupleba.ge/",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d22m21tuy5cszg.cloudfront.net",
+      "result": "000 https://d22m21tuy5cszg.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "www.ekhokavkaza.com",
+      "result": "200 https://www.ekhokavkaza.com/",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d2652p7airfs8d.cloudfront.net",
+      "result": "000 https://d2652p7airfs8d.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "www.radiofarda.com",
+      "result": "200 https://www.radiofarda.com/",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d1rszwrnlitcdf.cloudfront.net",
+      "result": "000 https://d1rszwrnlitcdf.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "rus.azattyq.org",
+      "result": "200 https://www.azattyqasia.org/?utm_medium=referral&utm_campaign=internal-rus-azattyq-org&utm_source=rus-azattyq-org&utm_content=kazakh&property_id=418",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d1sugjw44vshqd.cloudfront.net",
+      "result": "000 https://d1sugjw44vshqd.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "www.azattyq.org",
+      "result": "200 https://www.azattyq.org/",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d3h442fwe0so5h.cloudfront.net",
+      "result": "000 https://d3h442fwe0so5h.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "rus.azattyk.org",
+      "result": "200 https://www.azattyqasia.org/?utm_medium=referral&utm_campaign=internal-rus-azattyk-org&utm_source=rus-azattyk-org&utm_content=kyrgyz&property_id=440",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d1tpuu4nxnmigr.cloudfront.net",
+      "result": "000 https://d1tpuu4nxnmigr.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "www.azattyk.org",
+      "result": "200 https://www.azattyk.org/",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "dqo4kc1dcw9iw.cloudfront.net",
+      "result": "000 https://dqo4kc1dcw9iw.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "www.severreal.org",
+      "result": "200 https://www.svoboda.org/severrealii?utm_medium=referral&utm_campaign=internal-www-severreal-org&utm_source=severreal-org&utm_content=server&property_id=520",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d625y3otpz58.cloudfront.net",
+      "result": "000 https://d625y3otpz58.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "www.sibreal.org",
+      "result": "200 https://www.svoboda.org/sibreal?utm_medium=referral&utm_campaign=internal-www-sibreal-org&utm_source=sibreal-org&utm_content=sibir&property_id=543",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d2aywdt457pcvn.cloudfront.net",
+      "result": "000 https://d2aywdt457pcvn.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "www.idelreal.org",
+      "result": "200 https://www.svoboda.org/idel?utm_medium=referral&utm_campaign=internal-www-idelreal-org&utm_source=idelreal-org&utm_content=idel&property_id=535",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d3p450x7d8uz2l.cloudfront.net",
+      "result": "000 https://d3p450x7d8uz2l.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "www.radiomarsho.com",
+      "result": "200 https://www.radiomarsho.com/",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d3h19gyd9z3hf5.cloudfront.net",
+      "result": "000 https://d3h19gyd9z3hf5.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "www.svoboda.org",
+      "result": "200 https://www.svoboda.org/",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d3ro389divh0hy.cloudfront.net",
+      "result": "000 https://d3ro389divh0hy.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "www.azatliq.org",
+      "result": "200 https://www.azatliq.org/",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d1a90ccd464upe.cloudfront.net",
+      "result": "000 https://d1a90ccd464upe.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "www.kavkazr.com",
+      "result": "200 https://www.svoboda.org/caucasus?utm_medium=referral&utm_campaign=internal-www-kavkazr-com&utm_source=kavkazr-com&utm_content=kavkaz&property_id=534",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d2bmwbp2lbk4sx.cloudfront.net",
+      "result": "000 https://d2bmwbp2lbk4sx.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "ktat.krymr.com",
+      "result": "200 https://ktat.krymr.com/",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d3432zbwpwz1eg.cloudfront.net",
+      "result": "000 https://d3432zbwpwz1eg.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "ru.krymr.com",
+      "result": "200 https://ru.krymr.com/",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d3c11l8t5r2z4n.cloudfront.net",
+      "result": "000 https://d3c11l8t5r2z4n.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "ua.krymr.com",
+      "result": "200 https://ua.krymr.com/",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d182du3kmtwlt4.cloudfront.net",
+      "result": "000 https://d182du3kmtwlt4.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "www.currenttime.tv",
+      "result": "200 https://www.currenttime.tv/",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d2so81gt3r7oma.cloudfront.net",
+      "result": "000 https://d2so81gt3r7oma.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "en.currenttime.tv",
+      "result": "200 https://en.currenttime.tv/",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d21gehdv3gydp3.cloudfront.net",
+      "result": "000 https://d21gehdv3gydp3.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "rus.ozodi.org",
+      "result": "200 https://www.azattyqasia.org/?utm_medium=referral&utm_campaign=internal-rus-ozodi-org&utm_source=rus-ozodi-org&utm_content=tajik&property_id=442",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d1y4kdirfc66fb.cloudfront.net",
+      "result": "000 https://d1y4kdirfc66fb.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "www.ozodi.org",
+      "result": "200 https://www.ozodi.org/",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d2xporsu1xzbjj.cloudfront.net",
+      "result": "000 https://d2xporsu1xzbjj.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "rus.azathabar.com",
+      "result": "200 https://www.azattyqasia.org/?utm_medium=referral&utm_campaign=internal-rus-azathabar-com&utm_source=rus-azathabar-com&utm_content=turkmen&property_id=536",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d1si1vkmj688ic.cloudfront.net",
+      "result": "000 https://d1si1vkmj688ic.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "www.azathabar.com",
+      "result": "200 https://www.azathabar.com/",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d2uckb3le254jc.cloudfront.net",
+      "result": "000 https://d2uckb3le254jc.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "rus.ozodlik.org",
+      "result": "200 https://www.azattyqasia.org/?utm_medium=referral&utm_campaign=internal-rus-ozodlik-org&utm_source=rus-ozodlik-org&utm_content=uzbek&property_id=529",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d2vkmv7y44gye5.cloudfront.net",
+      "result": "000 https://d2vkmv7y44gye5.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "www.ozodlik.org",
+      "result": "200 https://www.ozodlik.org/",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "d2p9n3yor5segm.cloudfront.net",
+      "result": "000 https://d2p9n3yor5segm.cloudfront.net/",
+      "exit": 6
+    },
+    {
+      "kind": "original",
+      "host": "www.rferl.org",
+      "result": "200 https://www.rferl.org/",
+      "exit": 0
+    },
+    {
+      "kind": "mirror",
+      "host": "dbscbnspz9ye.cloudfront.net",
+      "result": "000 https://dbscbnspz9ye.cloudfront.net/",
+      "exit": 6
+    }
+  ]
+}

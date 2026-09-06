@@ -122,17 +122,32 @@ async function processURL(ctx: Context, url: string): Promise<void> {
         }
 
         const mirrorUrl = result.url;
-        botLogger.info({ userId, username, mirrorUrl }, 'Mirror URL generated');
+        const linkLabel =
+            result.kind === 'smart'
+                ? '🔗 Smart link'
+                : result.kind === 'mirror'
+                  ? '✅ Mirror URL'
+                  : '🔗 Original URL';
+        const linkNotice = [
+            result.notice,
+            result.kind === 'original'
+                ? '⚠️ No working smart link or mirror could be verified. This original link may be blocked in your region.'
+                : undefined,
+        ]
+            .filter(Boolean)
+            .join('\n');
+        const linkMessage = `${linkLabel}:\n\n${mirrorUrl}${linkNotice ? `\n\n${linkNotice}` : ''}`;
+        botLogger.info({ userId, username, kind: result.kind }, 'Article link prepared');
 
         await ctx.api.editMessageText(ctx.chat.id, statusMsg.message_id, '📖 Parsing article...');
-        const article = await parseArticle(url);
+        const article = await parseArticle(result.sourceUrl);
 
         if (!article) {
             botLogger.warn({ userId, username, url }, 'Article parsing failed');
             await ctx.api.editMessageText(
                 ctx.chat.id,
                 statusMsg.message_id,
-                `✅ Mirror URL:\n\n${mirrorUrl}\n\n⚠️ Could not parse article.`,
+                `${linkMessage}\n\n⚠️ Could not parse article.`,
             );
             return;
         }
@@ -151,7 +166,7 @@ async function processURL(ctx: Context, url: string): Promise<void> {
             await ctx.api.editMessageText(
                 ctx.chat.id,
                 statusMsg.message_id,
-                `✅ Mirror URL:\n\n${mirrorUrl}\n\n⚠️ Could not generate summaries.`,
+                `${linkMessage}\n\n⚠️ Could not generate summaries.`,
             );
             return;
         }
@@ -160,7 +175,8 @@ async function processURL(ctx: Context, url: string): Promise<void> {
 
         const finalMessage =
             `📘 Facebook:\n${summary.forFacebook}\n\n${mirrorUrl}\n\n` +
-            `🦅 Twitter:\n${summary.forTwitter}\n\n${mirrorUrl}`;
+            `🦅 Twitter:\n${summary.forTwitter}\n\n${mirrorUrl}` +
+            (linkNotice ? `\n\n${linkNotice}` : '');
 
         await ctx.api.editMessageText(ctx.chat.id, statusMsg.message_id, finalMessage);
     } catch (error) {
@@ -178,9 +194,9 @@ bot.command('start', async (ctx) => {
     botLogger.info({ userId: ctx.from?.id, username: ctx.from?.username }, '/start command');
     await ctx.reply(
         'Welcome! 👋\n\n' +
-            "Send me any RFE/RL URL and I'll generate a mirror link for you.\n\n" +
+            "Send a supported RFE/RL article URL for a smart link and summaries. If link generation fails, I'll return the original link.\n\n" +
             'Commands:\n' +
-            '/mirror <url> - Generate mirror URL\n' +
+            '/mirror <url> - Generate smart link\n' +
             '/help - Show help',
     );
 });
@@ -188,7 +204,7 @@ bot.command('start', async (ctx) => {
 bot.command('help', async (ctx) => {
     botLogger.info({ userId: ctx.from?.id, username: ctx.from?.username }, '/help command');
     await ctx.reply(
-        'Send any RFE/RL link and I’ll create a mirror link that works in restricted regions.',
+        'Send a supported RFE/RL article link. I’ll generate a smart link and create summaries. Archived Mashaal and Ekho Kavkaza articles are supported; original links may require a VPN.',
     );
 });
 

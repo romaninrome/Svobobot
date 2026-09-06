@@ -8,7 +8,8 @@
         "start": "bun src/linkbot.ts",
         "format": "prettier --write 'src/**/*.{ts,js,json,md}'",
         "test": "bun test ./tests",
-        "typecheck": "tsc --noEmit"
+        "typecheck": "tsc --noEmit",
+        "check:domains": "bun scripts/check-domains.ts"
     },
     "keywords": [],
     "author": "roman_in_rome",

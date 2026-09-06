@@ -1,4 +1,6 @@
-export const domains: Record<string, string> = {
+// Legacy mirror candidates, not guaranteed working endpoints. Always verify before use.
+// Service closures and live-check findings: docs/service-status.md.
+export const domains: Record<string, string | null> = {
     // Afghanistan and Pakistan
     'da.azadiradio.com': 'd1o1dnkfyuudx9.cloudfront.net',
     'pa.azadiradio.com': 'd10z1erkm7jz8z.cloudfront.net',
@@ -39,7 +41,7 @@ export const domains: Record<string, string> = {
     'ru.krymr.com': 'd3c11l8t5r2z4n.cloudfront.net',
     'ua.krymr.com': 'd182du3kmtwlt4.cloudfront.net',
 
-    //Ukraine
+    // Current Time (Russia programming unit)
     'www.currenttime.tv': 'd2so81gt3r7oma.cloudfront.net',
     'en.currenttime.tv': 'd21gehdv3gydp3.cloudfront.net',
 
@@ -58,6 +60,9 @@ export const domains: Record<string, string> = {
     // International
 
     'www.rferl.org': 'dbscbnspz9ye.cloudfront.net',
+
+    // Central Asian Russian-language coverage; no verified static mirror available.
+    'www.azattyqasia.org': null,
 };
 
 /** Accept bare aliases only when their www hostname is explicitly supported. */
@@ -70,3 +75,9 @@ export function normalizeSupportedURL(input: string): URL | null {
     }
     return url;
 }
+
+// Closed newsrooms retain their original domains for archived articles.
+export const archivedServices: Record<string, { name: string; closedOn: string }> = {
+    'www.mashaalradio.com': { name: 'Radio Mashaal', closedOn: '2026-03-31' },
+    'www.ekhokavkaza.com': { name: 'Ekho Kavkaza', closedOn: '2026-05-01' },
+};

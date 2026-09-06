@@ -1,14 +1,14 @@
 # Svobobot 🤖
 
-Telegram bot for RFE/RL articles — generates mirror URLs and AI summaries for audiences in restricted regions.
+Telegram bot for RFE/RL articles — generates publisher SmartURL links and creates AI summaries for audiences in restricted regions.
 
 ## 📋 Overview
 
 Svobobot helps circumvent censorship by:
 
-- 🔗 Generating mirror URLs for blocked RFE/RL content  
+- 🔗 Generating publisher SmartURL links, with an explicit original-link fallback
 - ✍️ Creating AI summaries optimised for social media (Facebook & X)  
-- 📰 Parsing full articles from 30+ RFE/RL domains  
+- 📰 Parsing articles from supported RFE/RL domains, including archived services
 - ✅ Validating links before processing (404 checking)
 
 ## 🧩 Environment Variables
@@ -22,8 +22,8 @@ TELEGRAM_BOT_TOKEN=xxx     # Telegram bot token from @BotFather
 GEMINI_API_KEY=xxx         # Google Gemini API key for summaries
 
 # Optional API endpoints and restrictions
-API_URL=https://your-api.com
-AUTH_TOKEN=xxx
+API_URL=https://smarturl.click/link
+AUTH_TOKEN=xxx             # Credential for the SmartURL API
 ALLOWED_CHAT_IDS=123,456   # Telegram chat IDs allowed to use the bot (comma-separated)
 
 # Development & logging
@@ -46,13 +46,15 @@ bun run test
 bun start
 ```
 
-`bun.lock` is the dependency lockfile. Tests use mocked services and do not send Telegram messages or make paid AI requests. `API_URL` and `AUTH_TOKEN` can be left empty to generate mirror links directly. Leave `ALLOWED_CHAT_IDS` empty to allow all chats, or supply comma-separated numeric chat IDs.
+`bun.lock` is the dependency lockfile. Tests use mocked services and do not send Telegram messages or make paid AI requests. `API_URL` is the complete endpoint (default: `https://smarturl.click/link`); set `AUTH_TOKEN` to your publisher API credential. The API returns a JSON `url` field. An explicitly empty `API_URL` disables the provider and tries legacy static candidates, all of which failed DNS checks in September 2026. Leave `ALLOWED_CHAT_IDS` empty to allow all chats, or supply comma-separated numeric chat IDs.
 
-Bare domains such as `svoboda.org` are accepted when their `www` host is supported. Confirmed 404 responses are rejected; other network failures still allow a mirror link. Article requests time out after 10 seconds and summary requests after 30 seconds.
+Bare domains such as `svoboda.org` are accepted when their `www` host is supported. Confirmed 404 responses are rejected. Generated links are checked with GET, since SmartURL rejects HEAD requests. Publisher SmartURL links are preserved even if they redirect to the original site from the bot’s location; this does not prove censorship bypass elsewhere. If no candidate is reachable, the bot labels the result as an original link that may be blocked. Article requests time out after 10 seconds and summary requests after 30 seconds.
+
+A live check on September 6, 2026, using the application code and an existing API credential successfully generated [a SmartURL article link](https://smarturl.click/VRag7), opened the article, and extracted its title and body. This verified generation and retrieval from the test connection, not accessibility inside censored networks.
 
 ## 🚀 Usage
 
-Send any RFE/RL URL to the bot or use:
+Send a supported RFE/RL article URL to the bot or use:
 
 ```
 /mirror <url>
@@ -65,10 +67,13 @@ Supported domains include:
 - severreal.org  
 - kavkazr.com  
 - currenttime.tv  
-- azadiradio.com  
+- da.azadiradio.com / pa.azadiradio.com
 - radiotavisupleba.ge  
 - radiofarda.com  
-- …and 23 other RFE/RL websites.
+- azattyqasia.org
+- mashaalradio.com / ekhokavkaza.com (archives)
+
+The exact allowlist is in [src/domains.ts](src/domains.ts). Domain aliases and language subdomains are not separate services. See [service status](docs/service-status.md) for closures, migrations, and the September 2026 mirror audit.
 
 ## 🗂 Project Structure
 

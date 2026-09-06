@@ -1,14 +1,21 @@
-import { domains, normalizeSupportedURL } from './domains';
+import { domains, normalizeSupportedURL, archivedServices } from './domains';
 import { config } from './config';
-import { isValidURL, checkUrlExists } from './checkurl';
+import { isValidURL, checkURL } from './checkurl';
 import { botLogger } from './logger';
 
 interface ApiResponse {
-    short_url?: string;
+    url?: string;
+    short_url?: string; // Compatibility with older custom providers.
 }
 
 export type MirrorURLResult =
-    | { success: true; url: string }
+    | {
+          success: true;
+          url: string;
+          sourceUrl: string;
+          kind: 'smart' | 'mirror' | 'original';
+          notice?: string;
+      }
     | {
           success: false;
           error: 'invalid_url' | 'unsupported_domain' | 'not_found' | 'generation_failure';
@@ -20,7 +27,8 @@ function addUtmParams(url: URL): void {
     url.searchParams.set('utm_source', 'otf');
 }
 
-function generateManualURL(originalUrl: URL, host: string): string {
+function generateManualURL(originalUrl: URL, host: string | null): string | null {
+    if (!host) return null;
     const urlObject = new URL(originalUrl.toString());
     addUtmParams(urlObject);
 
@@ -30,7 +38,12 @@ function generateManualURL(originalUrl: URL, host: string): string {
     }`;
 }
 
-function fallbackToManual(urlObject: URL, host: string, reason: string, error?: unknown): string {
+function fallbackToManual(
+    urlObject: URL,
+    host: string | null,
+    reason: string,
+    error?: unknown,
+): string | null {
     if (error) {
         botLogger.warn(
             { err: error, reason, url: urlObject.toString() },
@@ -45,14 +58,21 @@ function fallbackToManual(urlObject: URL, host: string, reason: string, error?: 
     return generateManualURL(urlObject, host);
 }
 
-async function generateShortURL(url: string, urlObject: URL, host: string): Promise<string> {
+async function generateShortURL(
+    url: string,
+    urlObject: URL,
+    host: string | null,
+): Promise<string | null> {
     if (!config.apiUrl) return generateManualURL(urlObject, host);
     try {
         botLogger.debug({ url, apiUrl: config.apiUrl }, 'Generating short URL via API');
 
-        const response = await fetch(`${config.apiUrl}/?url=${encodeURIComponent(url)}`, {
+        const endpoint = new URL(config.apiUrl);
+        endpoint.searchParams.set('url', url);
+        const response = await fetch(endpoint.toString(), {
             method: 'GET',
-            headers: { Authorization: config.authToken },
+            headers: { Authorization: config.authToken, 'Content-Type': 'application/json' },
+            redirect: 'error',
             signal: AbortSignal.timeout(10000),
         });
 
@@ -62,9 +82,10 @@ async function generateShortURL(url: string, urlObject: URL, host: string): Prom
         }
 
         const data: ApiResponse = await response.json();
-        if (data.short_url && isValidURL(data.short_url)) {
-            botLogger.debug({ url, shortUrl: data.short_url }, 'Successfully generated short URL');
-            return data.short_url;
+        const shortUrl = data.url ?? data.short_url;
+        if (typeof shortUrl === 'string' && isValidURL(shortUrl)) {
+            botLogger.debug({ url, shortUrl }, 'Successfully generated short URL');
+            return shortUrl;
         }
 
         botLogger.warn({ url, response: data }, 'API returned invalid or empty short URL');
@@ -83,7 +104,7 @@ export async function generateMirrorURL(url: string): Promise<MirrorURLResult> {
         return { success: false, error: 'invalid_url' };
     }
 
-    const urlObject = normalizeSupportedURL(url);
+    let urlObject = normalizeSupportedURL(url);
 
     if (!urlObject) {
         botLogger.warn({ url }, 'Unsupported domain');
@@ -92,24 +113,48 @@ export async function generateMirrorURL(url: string): Promise<MirrorURLResult> {
 
     botLogger.debug({ url, hostname: urlObject.hostname }, 'Domain is supported');
 
+    const archived = archivedServices[urlObject.hostname];
+    const notice = archived
+        ? `ℹ️ ${archived.name} closed on ${archived.closedOn}. This is archived content.`
+        : undefined;
     url = urlObject.toString();
-    const exists = await checkUrlExists(url);
-    if (exists === false) {
+    const original = await checkURL(url);
+    if (original.exists === false) {
         botLogger.warn({ url }, 'Article not found (404)');
         return { success: false, error: 'not_found' };
     }
 
-    botLogger.debug({ url }, 'Article exists, proceeding with mirror generation');
+    // Follow actual publisher redirects; never guess migrated article paths.
+    const redirected = isValidURL(original.url) ? normalizeSupportedURL(original.url) : null;
+    if (redirected) {
+        urlObject = redirected;
+        url = redirected.toString();
+    }
+    botLogger.debug({ url }, 'Proceeding with mirror generation');
 
     try {
         const host = domains[urlObject.hostname];
         const mirrorUrl = await generateShortURL(url, urlObject, host);
 
-        botLogger.info(
-            { url, mirrorUrl, hostname: urlObject.hostname },
-            'Mirror URL generated successfully',
-        );
-        return { success: true, url: mirrorUrl };
+        if (mirrorUrl) {
+            const candidate = await checkURL(mirrorUrl, 5000, 'GET');
+            const isSmartLink = new URL(mirrorUrl).hostname === 'smarturl.click';
+            // Keep publisher SmartURLs even when this connection lands on the original site.
+            const returnsToPublisher =
+                isValidURL(candidate.url) && normalizeSupportedURL(candidate.url);
+            if (candidate.exists === true && (isSmartLink || !returnsToPublisher)) {
+                botLogger.info({ url, mirrorUrl }, 'Generated link is reachable');
+                return {
+                    success: true,
+                    url: mirrorUrl,
+                    sourceUrl: url,
+                    kind: isSmartLink ? 'smart' : 'mirror',
+                    notice,
+                };
+            }
+        }
+        botLogger.warn({ url }, 'No working mirror verified; returning original link');
+        return { success: true, url, sourceUrl: url, kind: 'original', notice };
     } catch (error) {
         botLogger.error({ err: error, url }, 'Mirror URL generation failed after existence check');
         return { success: false, error: 'generation_failure' };
