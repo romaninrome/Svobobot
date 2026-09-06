@@ -7,7 +7,8 @@ interface Summary {
 }
 
 const ai = new GoogleGenAI({
-    apiKey: process.env.GEMINI_API_KEY, //
+    apiKey: process.env.GEMINI_API_KEY,
+    httpOptions: { timeout: 30000, retryOptions: { attempts: 1 } },
 });
 
 export async function generateSummary(title: string, body: string): Promise<Summary | null> {

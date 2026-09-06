@@ -1,11 +1,12 @@
 import { Bot, Context } from 'grammy';
 import { config } from './config';
-import { generateMirrorURL, MirrorURLResult } from './urlgenerator';
-import { domains } from './domains';
+import { generateMirrorURL, MirrorURLResult } from './urlGenerator';
+import { normalizeSupportedURL } from './domains';
+import { isValidURL } from './checkurl';
 import { parseArticle } from './htmlparser';
 import { generateSummary } from './summariser';
 import { botLogger } from './logger';
-import { errorHandler } from './errorhandler';
+import { errorHandler } from './errorHandler';
 
 const bot = new Bot(config.telegramToken);
 
@@ -42,8 +43,8 @@ setInterval(() => {
 
 function validateRequest(ctx: Context, url: string): string | null {
     try {
-        const urlObject = new URL(url);
-        if (!domains[urlObject.hostname]) {
+        if (!isValidURL(url)) return '❌ Invalid URL provided.';
+        if (!normalizeSupportedURL(url)) {
             botLogger.info(
                 { userId: ctx.from?.id, username: ctx.from?.username, url },
                 'Unsupported domain',
@@ -65,6 +66,7 @@ function validateRequest(ctx: Context, url: string): string | null {
         return '⏳ Please wait a moment before sending another request.';
     }
 
+    if (!ctx.chat) return '❌ Cannot identify chat.';
     const allowedChats = config.allowedChats;
     if (allowedChats.length > 0 && !allowedChats.includes(ctx.chat.id)) {
         botLogger.warn(
@@ -78,6 +80,7 @@ function validateRequest(ctx: Context, url: string): string | null {
 }
 
 async function processURL(ctx: Context, url: string): Promise<void> {
+    if (!ctx.chat) return;
     const userId = ctx.from?.id;
     const username = ctx.from?.username;
     botLogger.info({ userId, username, url }, 'Received URL request');
@@ -89,6 +92,7 @@ async function processURL(ctx: Context, url: string): Promise<void> {
         return;
     }
 
+    url = normalizeSupportedURL(url)!.toString();
     const statusMsg = await ctx.reply('🔄 Processing article...');
 
     try {
@@ -170,9 +174,9 @@ async function processURL(ctx: Context, url: string): Promise<void> {
 }
 
 // Commands
-bot.command('start', (ctx) => {
+bot.command('start', async (ctx) => {
     botLogger.info({ userId: ctx.from?.id, username: ctx.from?.username }, '/start command');
-    ctx.reply(
+    await ctx.reply(
         'Welcome! 👋\n\n' +
             "Send me any RFE/RL URL and I'll generate a mirror link for you.\n\n" +
             'Commands:\n' +
@@ -181,9 +185,9 @@ bot.command('start', (ctx) => {
     );
 });
 
-bot.command('help', (ctx) => {
+bot.command('help', async (ctx) => {
     botLogger.info({ userId: ctx.from?.id, username: ctx.from?.username }, '/help command');
-    ctx.reply(
+    await ctx.reply(
         'Send any RFE/RL link and I’ll create a mirror link that works in restricted regions.',
     );
 });
@@ -216,5 +220,7 @@ bot.on('message:text', async (ctx) => {
 
 errorHandler(bot);
 
-bot.start();
-botLogger.info('✅ [Svobobot] is running...');
+bot.start({ onStart: () => botLogger.info('✅ [Svobobot] is running...') }).catch((error) => {
+    botLogger.fatal({ err: error }, 'Bot startup failed');
+    process.exit(1);
+});

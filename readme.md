@@ -33,6 +33,23 @@ LOG_LEVEL=debug             # Options: fatal, error, warn, info, debug, trace
 
 💡 If deploying with Bun or Docker, these variables can be set directly via the environment.
 
+## Setup and checks
+
+Install [Bun](https://bun.sh), then run:
+
+```sh
+bun install --frozen-lockfile
+cp .env.example .env
+# Fill in your credentials in .env before starting.
+bun run typecheck
+bun run test
+bun start
+```
+
+`bun.lock` is the dependency lockfile. Tests use mocked services and do not send Telegram messages or make paid AI requests. `API_URL` and `AUTH_TOKEN` can be left empty to generate mirror links directly. Leave `ALLOWED_CHAT_IDS` empty to allow all chats, or supply comma-separated numeric chat IDs.
+
+Bare domains such as `svoboda.org` are accepted when their `www` host is supported. Confirmed 404 responses are rejected; other network failures still allow a mirror link. Article requests time out after 10 seconds and summary requests after 30 seconds.
+
 ## 🚀 Usage
 
 Send any RFE/RL URL to the bot or use:
@@ -57,13 +74,13 @@ Supported domains include:
 
 ```
 linkbot.ts        # Main bot logic
-urlgenerator.ts   # Mirror generation
+urlGenerator.ts   # Mirror generation
 htmlparser.ts     # Article extraction
 summariser.ts     # AI summaries
 checkurl.ts       # URL validation
 config.ts         # Configuration
 domains.ts        # Domain mappings
-errorhandler.ts   # Main bot error handling
+errorHandler.ts   # Main bot error handling
 logger.ts         # Pino-based logger
 .env.example      # Example environment file
 ```

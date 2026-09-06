@@ -1,4 +1,4 @@
-import { domains } from './domains';
+import { domains, normalizeSupportedURL } from './domains';
 import { config } from './config';
 import { isValidURL, checkUrlExists } from './checkurl';
 import { botLogger } from './logger';
@@ -46,19 +46,15 @@ function fallbackToManual(urlObject: URL, host: string, reason: string, error?: 
 }
 
 async function generateShortURL(url: string, urlObject: URL, host: string): Promise<string> {
+    if (!config.apiUrl) return generateManualURL(urlObject, host);
     try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 10000);
-
         botLogger.debug({ url, apiUrl: config.apiUrl }, 'Generating short URL via API');
 
         const response = await fetch(`${config.apiUrl}/?url=${encodeURIComponent(url)}`, {
             method: 'GET',
             headers: { Authorization: config.authToken },
-            signal: controller.signal,
+            signal: AbortSignal.timeout(10000),
         });
-
-        clearTimeout(timeout);
 
         if (!response.ok) {
             botLogger.warn({ url, status: response.status }, 'API returned non-OK response');
@@ -87,17 +83,18 @@ export async function generateMirrorURL(url: string): Promise<MirrorURLResult> {
         return { success: false, error: 'invalid_url' };
     }
 
-    const urlObject = new URL(url);
+    const urlObject = normalizeSupportedURL(url);
 
-    if (!domains[urlObject.hostname]) {
-        botLogger.warn({ hostname: urlObject.hostname, url }, 'Unsupported domain');
+    if (!urlObject) {
+        botLogger.warn({ url }, 'Unsupported domain');
         return { success: false, error: 'unsupported_domain' };
     }
 
     botLogger.debug({ url, hostname: urlObject.hostname }, 'Domain is supported');
 
+    url = urlObject.toString();
     const exists = await checkUrlExists(url);
-    if (!exists) {
+    if (exists === false) {
         botLogger.warn({ url }, 'Article not found (404)');
         return { success: false, error: 'not_found' };
     }

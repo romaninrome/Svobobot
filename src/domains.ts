@@ -59,3 +59,14 @@ export const domains: Record<string, string> = {
 
     'www.rferl.org': 'dbscbnspz9ye.cloudfront.net',
 };
+
+/** Accept bare aliases only when their www hostname is explicitly supported. */
+export function normalizeSupportedURL(input: string): URL | null {
+    const url = new URL(input);
+    if (!Object.hasOwn(domains, url.hostname)) {
+        const canonical = `www.${url.hostname}`;
+        if (!Object.hasOwn(domains, canonical)) return null;
+        url.hostname = canonical;
+    }
+    return url;
+}

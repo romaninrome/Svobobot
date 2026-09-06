@@ -9,11 +9,14 @@ interface Article {
 
 const polAzara = 8000; // Max parsing text size. An insider joke, don't sweat it.
 
-export async function parseArticle(url: string): Promise<Article | null> {
+export async function parseArticle(
+    url: string,
+    timeoutMs: number = 10000,
+): Promise<Article | null> {
     try {
         botLogger.debug({ url }, 'Starting article parse');
 
-        const response = await fetch(url);
+        const response = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) });
         if (!response.ok) {
             botLogger.warn(
                 { url, status: response.status },
